@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Before / After Mix Compare</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b0b; color:#f5f5f5; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px; }
+  h1 { font-size: 20px; margin: 0 0 12px; font-weight:600; }
+  p.note { opacity:.75; margin:0 0 16px; }
+  .card { background:#111; border:1px solid #222; border-radius:14px; padding:16px; }
+  .row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .grow { flex:1 1 auto; }
+  .label { min-width:110px; opacity:.8; }
+  button, input[type="range"] {
+    appearance:none; border:0; border-radius:10px; padding:10px 14px; background:#1e1e1e; color:#fff; cursor:pointer;
+  }
+  button:hover { background:#2a2a2a; }
+  .toggle { background:#0aa36f; }
+  .toggle.off { background:#484848; }
+  .footer { margin-top:10px; font-size:12px; opacity:.7; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Before / After Mix Compare</h1>
+    <p class="note">Toggle between the raw “Before” and the final “After” master. Files are loudness-matched for a fair comparison.</p>
+
+    <div class="card">
+      <div class="row">
+        <button id="play">▶ Play</button>
+        <button id="toggle" class="toggle">AFTER</button>
+        <div id="status" class="footer">Click to switch BEFORE / AFTER</div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div class="label">Position</div>
+        <input id="seek" type="range" min="0" max="1000" value="0" class="grow" />
+        <div id="time" style="min-width:44px; text-align:right;">0:00</div>
+      </div>
+
+      <div class="row" style="margin-top:8px;">
+        <div class="label">Gain Match</div>
+        <input id="gain" type="range" min="-8" max="8" step="0.5" value="0" class="grow" />
+        <div class="footer" style="min-width:60px; text-align:right;">± dB</div>
+      </div>
+
+      <div class="footer" style="margin-top:10px;">Files: <code>before.wav</code> & <code>after.wav</code> (same length, same start).</div>
+    </div>
+
+    <div class="footer">Tip: keep clips 20–45s for speedy loading.</div>
+  </div>
+
+<script>
+  const A = new Audio('before.wav'); // BEFORE
+  const B = new Audio('after.wav');  // AFTER
+  A.preload = 'auto'; B.preload = 'auto';
+
+  let isPlaying = false;
+  let isAfter = true;
+  let active = B, inactive = A;
+
+  const $ = id => document.getElementById(id);
+  const playBtn = $('play');
+  const toggleBtn = $('toggle');
+  const seek = $('seek');
+  const timeLbl = $('time');
+
+  const fmt = t => {
+    const m = Math.floor(t/60);
+    const s = Math.floor(t%60).toString().padStart(2,'0');
+    return `${m}:${s}`;
+  };
+
+  async function startPlayOnce(aud) {
+    try { await aud.play(); aud.pause(); } catch(e) {}
+  }
+
+  playBtn.onclick = async () => {
+    if (!isPlaying) {
+      await startPlayOnce(A); await startPlayOnce(B);
+      active = isAfter ? B : A;
+      await active.play();
+      isPlaying = true;
+      playBtn.textContent = '⏸ Pause';
+    } else {
+      A.pause(); B.pause();
+      isPlaying = false;
+      playBtn.textContent = '▶ Play';
+    }
+  };
+
+  toggleBtn.onclick = async () => {
+    isAfter = !isAfter;
+    toggleBtn.textContent = isAfter ? 'AFTER' : 'BEFORE';
+    toggleBtn.classList.toggle('off', !isAfter);
+    const next = isAfter ? B : A;
+    const prev = isAfter ? A : B;
+    next.currentTime = prev.currentTime;
+    if (isPlaying) { await next.play(); prev.pause(); }
+    active = next; inactive = prev;
+  };
+
+  seek.oninput = () => {
+    const dur = active.duration || 1;
+    const t = (seek.value / 1000) * dur;
+    A.currentTime = t; B.currentTime = t;
+    if (isPlaying) active.play();
+  };
+
+  setInterval(() => {
+    const dur = active.duration || 1;
+    if (dur > 0) {
+      seek.value = Math.floor((active.currentTime / dur) * 1000);
+      timeLbl.textContent = fmt(active.currentTime || 0);
+      if (Math.abs(inactive.currentTime - active.currentTime) > 0.05) {
+        inactive.currentTime = active.currentTime;
+      }
+    }
+  }, 100);
+
+  $('gain').oninput = (e) => {
+    const db = parseFloat(e.target.value);
+    const gain = Math.pow(10, db/20);
+    A.volume = Math.min(1, gain);
+    B.volume = Math.min(1, gain);
+  };
+
+  [A, B].forEach(a => a.addEventListener('ended', () => {
+    isPlaying = false; playBtn.textContent = '▶ Play';
+  }));
+</script>
+</body>
+</html>

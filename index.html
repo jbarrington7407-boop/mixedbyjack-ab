@@ -4,69 +4,155 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Before / After Mix Compare</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { color-scheme: dark; }
-  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0b0b; color:#f5f5f5; }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 28px 18px; }
-  h1 { font-size: 20px; margin: 0 0 12px; font-weight:600; }
-  p.note { opacity:.75; margin:0 0 16px; }
-  .card { background:#111; border:1px solid #222; border-radius:14px; padding:16px; }
-  .row { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-  .grow { flex:1 1 auto; }
-  .label { min-width:110px; opacity:.8; }
-  button, input[type="range"] {
-    appearance:none; border:0; border-radius:10px; padding:10px 14px; background:#1e1e1e; color:#fff; cursor:pointer;
+  :root{
+    --bg: #0b0b0b;        /* page background */
+    --panel: #101013;     /* card background */
+    --panel-2:#15161a;    /* inner card */
+    --text:#f2f2f2;       /* primary text */
+    --muted:#9aa0a6;      /* secondary text */
+    --border:#23252b;     /* borders */
+    --accent:#00e5a8;     /* MIXEDBYJACK accent */
+    --accent-2:#0fcf96;   /* hover accent */
   }
-  button:hover { background:#2a2a2a; }
-  .toggle { background:#0aa36f; }
-  .toggle.off { background:#484848; }
-  .footer { margin-top:10px; font-size:12px; opacity:.7; }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:linear-gradient(180deg, #0a0a0a 0%, #0b0b0b 100%);
+    color:var(--text);
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 18px}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .header{
+    display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px
+  }
+  h1{
+    margin:0;font-size:24px;line-height:1.25;font-weight:700;
+    letter-spacing:.2px;
+  }
+  .sub{margin:4px 0 0;color:var(--muted);font-size:14px}
+  /* Controls row */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:12px
+  }
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:12px 16px;border-radius:12px;border:1px solid var(--border);
+    background:var(--panel-2);color:var(--text);cursor:pointer;
+    transition:.15s transform, .15s background, .15s border-color;
+    font-weight:600;
+  }
+  .btn:hover{transform:translateY(-1px);border-color:#2b2d34;background:#17181d}
+  .play{font-size:16px}
+  /* Segmented toggle */
+  .seg{
+    display:flex;border:1px solid var(--border);border-radius:12px;
+    background:#0e0f13;overflow:hidden;
+  }
+  .seg button{
+    flex:1 1 auto;padding:10px 16px;border:0;background:transparent;color:var(--muted);
+    font-weight:700;cursor:pointer;transition:.15s background,.15s color;
+  }
+  .seg button.active{background:var(--accent);color:#081812}
+  .seg button:not(.active):hover{color:#cfd2d6}
+  /* Seek + gain rows */
+  .row{display:flex;align-items:center;gap:12px;margin:12px 0}
+  .label{width:98px;color:var(--muted);font-size:13px}
+  input[type="range"]{width:100%;accent-color:var(--accent)}
+  .time{min-width:52px;text-align:right;color:#d9dde3;font-variant-numeric:tabular-nums}
+  /* Footer */
+  .foot{margin-top:8px;color:var(--muted);font-size:12px}
+  /* CTA */
+  .cta{
+    margin-top:18px;display:flex;justify-content:flex-start
+  }
+  .cta a{
+    background:var(--accent);color:#052015;text-decoration:none;
+    padding:12px 16px;border-radius:12px;font-weight:700;transition:.15s background;
+  }
+  .cta a:hover{background:var(--accent-2)}
+  /* Mobile */
+  @media (max-width:720px){
+    .header{flex-direction:column;align-items:flex-start}
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Before / After Mix Compare</h1>
-    <p class="note">Toggle between the raw “Before” and the final “After” master. Files are loudness-matched for a fair comparison.</p>
-
-    <div class="card">
-      <div class="row">
-        <button id="play">▶ Play</button>
-        <button id="toggle" class="toggle">AFTER</button>
-        <div id="status" class="footer">Click to switch BEFORE / AFTER</div>
+    <div class="header">
+      <div>
+        <h1>Hear the Transformation</h1>
+        <p class="sub">Toggle between the raw session and the final master. Loudness-matched for a fair comparison.</p>
       </div>
-
-      <div class="row" style="margin-top:12px;">
-        <div class="label">Position</div>
-        <input id="seek" type="range" min="0" max="1000" value="0" class="grow" />
-        <div id="time" style="min-width:44px; text-align:right;">0:00</div>
-      </div>
-
-      <div class="row" style="margin-top:8px;">
-        <div class="label">Gain Match</div>
-        <input id="gain" type="range" min="-8" max="8" step="0.5" value="0" class="grow" />
-        <div class="footer" style="min-width:60px; text-align:right;">± dB</div>
-      </div>
-
-      <div class="footer" style="margin-top:10px;">Files: <code>before.wav</code> & <code>after.wav</code> (same length, same start).</div>
     </div>
 
-    <div class="footer">Tip: keep clips 20–45s for speedy loading.</div>
+    <div class="card">
+      <div class="controls">
+        <button id="play" class="btn play">▶ Play</button>
+
+        <div class="seg" role="tablist" aria-label="Before After Toggle">
+          <button id="beforeBtn" class="active" role="tab" aria-selected="true">BEFORE</button>
+          <button id="afterBtn" role="tab" aria-selected="false">AFTER</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="label">Position</div>
+        <input id="seek" type="range" min="0" max="1000" value="0" />
+        <div id="time" class="time">0:00</div>
+      </div>
+
+      <div class="row">
+        <div class="label">Gain Match</div>
+        <input id="gain" type="range" min="-8" max="8" step="0.5" value="0" />
+        <div class="time">± dB</div>
+      </div>
+
+      <div class="foot">Files: <code>before.wav</code> and <code>after.wav</code> (same length, same start time).</div>
+
+      <div class="cta">
+        <a href="https://www.mixedbyjack.net/#contact" target="_blank" rel="noopener">Book Your Mix</a>
+      </div>
+    </div>
   </div>
 
 <script>
+  // Audio setup (WAV files)
   const A = new Audio('before.wav'); // BEFORE
   const B = new Audio('after.wav');  // AFTER
   A.preload = 'auto'; B.preload = 'auto';
 
+  // State
   let isPlaying = false;
-  let isAfter = true;
-  let active = B, inactive = A;
-
+  let active = A, inactive = B;  // default to BEFORE selected
+  // Elements
   const $ = id => document.getElementById(id);
   const playBtn = $('play');
-  const toggleBtn = $('toggle');
+  const beforeBtn = $('beforeBtn');
+  const afterBtn = $('afterBtn');
   const seek = $('seek');
   const timeLbl = $('time');
+  const gainCtl = $('gain');
+
+  function setActive(which){
+    active = which === 'A' ? A : B;
+    inactive = which === 'A' ? B : A;
+    beforeBtn.classList.toggle('active', which === 'A');
+    afterBtn.classList.toggle('active', which !== 'A');
+    beforeBtn.setAttribute('aria-selected', which === 'A');
+    afterBtn.setAttribute('aria-selected', which !== 'A');
+  }
+  setActive('A'); // start on BEFORE visually
 
   const fmt = t => {
     const m = Math.floor(t/60);
@@ -74,14 +160,11 @@
     return `${m}:${s}`;
   };
 
-  async function startPlayOnce(aud) {
-    try { await aud.play(); aud.pause(); } catch(e) {}
-  }
+  async function prime(aud){ try{ await aud.play(); aud.pause(); }catch(e){} }
 
   playBtn.onclick = async () => {
     if (!isPlaying) {
-      await startPlayOnce(A); await startPlayOnce(B);
-      active = isAfter ? B : A;
+      await prime(A); await prime(B);
       await active.play();
       isPlaying = true;
       playBtn.textContent = '⏸ Pause';
@@ -92,17 +175,21 @@
     }
   };
 
-  toggleBtn.onclick = async () => {
-    isAfter = !isAfter;
-    toggleBtn.textContent = isAfter ? 'AFTER' : 'BEFORE';
-    toggleBtn.classList.toggle('off', !isAfter);
-    const next = isAfter ? B : A;
-    const prev = isAfter ? A : B;
-    next.currentTime = prev.currentTime;
-    if (isPlaying) { await next.play(); prev.pause(); }
-    active = next; inactive = prev;
+  // Toggle buttons
+  beforeBtn.onclick = async () => {
+    if (active === A) return;
+    A.currentTime = B.currentTime;
+    if (isPlaying){ await A.play(); B.pause(); }
+    setActive('A');
+  };
+  afterBtn.onclick = async () => {
+    if (active === B) return;
+    B.currentTime = A.currentTime;
+    if (isPlaying){ await B.play(); A.pause(); }
+    setActive('B');
   };
 
+  // Seek
   seek.oninput = () => {
     const dur = active.duration || 1;
     const t = (seek.value / 1000) * dur;
@@ -110,6 +197,15 @@
     if (isPlaying) active.play();
   };
 
+  // Gain (simple trim applied to both)
+  gainCtl.oninput = (e) => {
+    const db = parseFloat(e.target.value);
+    const gain = Math.pow(10, db/20);
+    A.volume = Math.min(1, gain);
+    B.volume = Math.min(1, gain);
+  };
+
+  // Progress + sync inactive
   setInterval(() => {
     const dur = active.duration || 1;
     if (dur > 0) {
@@ -121,16 +217,10 @@
     }
   }, 100);
 
-  $('gain').oninput = (e) => {
-    const db = parseFloat(e.target.value);
-    const gain = Math.pow(10, db/20);
-    A.volume = Math.min(1, gain);
-    B.volume = Math.min(1, gain);
-  };
-
-  [A, B].forEach(a => a.addEventListener('ended', () => {
+  [A,B].forEach(a => a.addEventListener('ended', () => {
     isPlaying = false; playBtn.textContent = '▶ Play';
   }));
 </script>
 </body>
 </html>
+

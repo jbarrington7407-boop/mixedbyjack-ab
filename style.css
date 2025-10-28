@@ -1,271 +1,100 @@
+/* Reset / base */
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
-* {
-  margin: 0;
-}
-html,
-body {
-  height: 100%;
-}
+*::after { box-sizing: border-box; }
+* { margin: 0; }
+html, body { height: 100%; }
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  font-family: 'Lato', sans-serif;
-}
-img,
-picture,
-video,
-canvas,
-svg {
-  display: block;
-  max-width: 100%;
-}
-input,
-button,
-textarea,
-select {
-  font: inherit;
-}
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  overflow-wrap: break-word;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   background: #e6e6e6;
   display: grid;
-  justify-items: center;
-  grid-template-rows: 2fr 4fr;
+  place-items: center;
+  padding: 24px;
 }
 
-#intro {
-  max-width: 90vw;
-  margin-bottom: 3rem;
-  align-content: center;
-  justify-content: space-around;
-  align-items: center;
-  align-self: end;
-  text-align: center;
-  color: #393939;
-
-  font-size: 1.2em;
-}
-
-#intro h1 {
-  font-size: 1.4em;
-  font-weight: 700;
-}
-
-#intro p {
-  margin-top: 20px;
-  font-size: 0.85em;
-  color: #606060;
-}
-#tagline {
-  font-size: 0.78em;
-  margin-bottom: 0px;
-  color: #606060;
-}
-
-#intro a {
-  transition: all 0.3s;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #089aa1;
-}
-
-#intro a:hover {
-  opacity: 0.8;
-}
-
-.players {
-  display: inline-grid;
-  justify-content: center;
-  align-items: center;
-  grid-template-columns: 1fr 1fr;
-}
-
+/* Wrapper + themes */
 .player__wrapper {
-  border-radius: 50px;
-  background: #e6e6e6;
+  border-radius: 24px;
+  padding: 20px;
+  width: 100%;
+  max-width: 520px;
+  transition: background .25s ease, color .25s ease, box-shadow .25s ease;
+}
+.player__wrapper.light {
+  background:#f0f0f0; color:#000;
   box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #ffffff;
-  padding: 4vh 5.5vw 4.5vh 5.5vw;
-  max-width: 500px;
-  align-self: start;
-  margin: 20px 2vw;
+}
+.player__wrapper.dark {
+  background:#111111; color:#fff;
+  box-shadow: 0 0 20px rgba(0,0,0,.6);
 }
 
+/* Progress bar */
+.progress__container {
+  height: 14px; width: 100%;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  cursor: pointer;
+  overflow: hidden;
+  background: rgba(0,0,0,.10);
+  box-shadow: inset 7px 7px 15px rgba(0,0,0,.12), inset -7px -7px 15px rgba(255,255,255,.6);
+}
+.player__wrapper.dark .progress__container {
+  background: rgba(255,255,255,.18);
+  box-shadow: inset 5px 5px 12px rgba(0,0,0,.35);
+}
+
+/* Purple brand bar (fill) */
+.progress__bar {
+  /* MixedByJack purple gradient */
+  background: linear-gradient(360deg, #8A4FFF, #B28DFF);
+  height: 100%;
+  width: 0%;
+  border-radius: 10px;
+  transition: width .05s linear;
+}
+
+/* AB controls */
 .ab__controls {
   display: grid;
-  align-content: center;
-  align-items: baseline;
   grid-template-columns: 1fr 1fr;
-  justify-content: center;
-  justify-items: center;
-  width: 100%;
+  gap: 12px;
+  margin-bottom: 12px;
 }
-
 button {
-  font-size: 1.3rem;
-  text-transform: uppercase;
+  font-size: 1rem;
   border: none;
-  color: #9b9b9b;
-  width: 5rem;
-  padding: 0.75rem;
   border-radius: 12px;
-  background: #e6e6e6;
-  box-shadow: 7px 7px 15px #cdcdcd, -7px -7px 15px #ffffff;
+  padding: .7rem 1rem;
+  background: transparent;
+  color: inherit;
+  box-shadow: inset 5px 5px 10px rgba(0,0,0,.15), inset -5px -5px 10px rgba(255,255,255,.08);
   cursor: pointer;
-  transition: all ease-in-out 0.3s;
+  transition: transform .15s ease, opacity .15s ease, box-shadow .2s ease;
 }
-
+button:hover { transform: scale(1.03); }
 button:disabled {
-  color: #c9c9c9;
-  box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #ffffff;
-  transition: all ease-in-out 0.3s;
-}
-button:disabled:hover {
-  color: #c9c9c9;
-  box-shadow: inset 5px 5px 15px #cdcdcd, inset -5px -5px 15px #ffffff;
+  opacity: .5; cursor: not-allowed;
+  box-shadow: inset 7px 7px 15px rgba(0,0,0,.15), inset -7px -7px 15px rgba(255,255,255,.1);
 }
 
-button:hover {
-  box-shadow: 4px 4px 15px #cdcdcd, -4px -4px 15px #ffffff;
-}
-
-.a__button {
-  width: 8rem;
-  border-radius: 12px 0 0 12px;
-  justify-self: self-end;
-}
-
-.b__button {
-  width: 8rem;
-  border-radius: 0 12px 12px 0;
-  justify-self: self-start;
-}
-
-.play__button {
-  justify-self: self-end;
-}
-
-.stop__button {
-  width: 5rem;
-  color: #966f6f;
-  justify-self: self-start;
-}
-
-.stop__button:disabled {
-  color: #966f6fd3;
-}
-
+/* Transport */
 .play__stop__controls {
-  margin-top: 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  justify-content: center;
-  grid-gap: 1rem;
+  gap: 12px;
 }
-
-.progress__container {
-  display: inline-flex;
-  background: #a8a8a8;
-  height: 1rem;
-  width: 100%;
-  margin-bottom: 2.4rem;
-  border-radius: 10px;
-  border-radius: 12px;
-  background: #e6e6e6;
-  box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #ffffff;
-  cursor: pointer;
-  align-self: center;
-  overflow: hidden;
-}
-
-.progress__bar {
-  background: linear-gradient(360deg, #8A4FFF, #B28DFF);
-  border-radius: 12px;
-  transition: all ease-in-out 0.03s;
-}
-
-.progress__fill {
-  width: 0%;
-}
-
-@media screen (min-width: 768px) {
-  body {
-    grid-template-rows: 1fr 1fr;
-  }
-
-  #intro {
-    margin-bottom: 0;
-  }
-
-  .players {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .players {
-    grid-template-columns: 1fr;
-  }
-}
-/* === Icon colors and sizes (MixedByJack theme) === */
 .play__button i {
-  color: #8A4FFF;      /* MixedByJack purple */
-  font-size: 1.6rem;
-  transition: color 0.2s ease;
+  color:#8A4FFF; /* purple play/pause */
+  font-size:1.6rem;
+  transition: color .2s ease;
 }
-
-.play__button:hover i {
-  color: #B28DFF;      /* lighter purple on hover */
-}
-
+.play__button:hover i { color:#B28DFF; }
 .stop__button i {
-  color: #C74A4A;      /* subtle red for stop */
-  font-size: 1.6rem;
-  transition: color 0.2s ease;
+  color:#C74A4A; /* soft red stop */
+  font-size:1.6rem;
+  transition: color .2s ease;
 }
-
-.stop__button:hover i {
-  color: #FF6B6B;      /* brighter red hover */
-}
-
-.b__button i, .a__button i {
-  color: inherit;       /* match text color */
-}
-/* THEME TOGGLE */
-.player__wrapper.light {
-  background: #e6e6e6;
-  color: #000;
-  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #ffffff;
-}
-
-.player__wrapper.dark {
-  background: #111111;
-  color: #fff;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-}
-
-/* progress bar color in both themes (MixedByJack purple) */
-.player__wrapper.light .progress__bar,
-.player__wrapper.dark .progress__bar {
-  background: linear-gradient(360deg, #8A4FFF, #B28DFF);
-}
-
-/* make icons a touch larger */
-.play__button i, .stop__button i { font-size: 1.6rem; }
+.stop__button:hover i { color:#FF6B6B; }

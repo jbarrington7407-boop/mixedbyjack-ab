@@ -1,36 +1,20 @@
-// Find players and initialize
 const players = document.querySelectorAll('.player__wrapper');
 initializePlayers(players);
 
 function initializePlayers(players) {
   players.forEach((player) => {
     /* ===== Theme helpers ===== */
-    function setLight(){ player.classList.add('light'); player.classList.remove('dark'); }
-    function setDark(){  player.classList.add('dark');  player.classList.remove('light'); }
-
-    /* ===== Active highlight helpers ===== */
-    const setActiveBefore = () => {
-      aButton.classList.add('is-active');
-      bButton.classList.remove('is-active');
-    };
-    const setActiveAfter = () => {
-      bButton.classList.add('is-active');
-      aButton.classList.remove('is-active');
-    };
-
-    setLight(); // start in light (Before)
+    const setLight = () => { player.classList.add('light'); player.classList.remove('dark'); };
+    const setDark  = () => { player.classList.add('dark');  player.classList.remove('light'); };
+    setLight(); // start light (Before)
 
     /* ===== Audio elements ===== */
     const soundA = document.createElement('audio');
-    soundA.src = player.getAttribute('data-audio-a');
-    soundA.preload = 'auto';
-    soundA.hidden = true;
+    soundA.src = player.getAttribute('data-audio-a'); soundA.preload = 'auto'; soundA.hidden = true;
     document.body.append(soundA);
 
     const soundB = document.createElement('audio');
-    soundB.src = player.getAttribute('data-audio-b');
-    soundB.preload = 'auto';
-    soundB.hidden = true;
+    soundB.src = player.getAttribute('data-audio-b'); soundB.preload = 'auto'; soundB.hidden = true;
     document.body.append(soundB);
 
     /* ===== UI elements ===== */
@@ -47,7 +31,7 @@ function initializePlayers(players) {
     const pauseIcon = '<i class="fa-solid fa-pause" style="color:#8A4FFF;"></i>';
     const stopIcon  = '<i class="fa-solid fa-stop"  style="color:#C74A4A;"></i>';
 
-    // mobile: allow pressing play before full canplaythrough
+    // Allow mobile to hit play early
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
       playButton.disabled = false;
     }
@@ -59,18 +43,23 @@ function initializePlayers(players) {
 
     function audioIsReady(){
       if (readyA && readyB) {
-        aButton.disabled = false;
-        playButton.disabled = false;
-        // ensure icons present
-        if (!playButton.innerHTML.trim()) playButton.innerHTML = playIcon;
-        if (!stopButton.innerHTML.trim()) stopButton.innerHTML = stopIcon;
-        // initial highlight on Before
-        setActiveBefore();
-        bButton.disabled = true;  // keep current selection in the forefront
+        aButton.removeAttribute('disabled');
+        bButton.removeAttribute('disabled');
+        playButton.removeAttribute('disabled');
+        stopButton.setAttribute('disabled','');
+        // ensure icons
+        playButton.innerHTML = playIcon;
+        stopButton.innerHTML = stopIcon;
+        // initial state: Before is active
+        setPressed(aButton, true);
+        setPressed(bButton, false);
       }
     }
 
-    /* ===== Seek (click progress) ===== */
+    /* ===== A11y pressed helpers ===== */
+    const setPressed = (btn, pressed) => btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+
+    /* ===== Seek ===== */
     if (progressEl) {
       progressEl.addEventListener('click', (e) => {
         const rect = progressEl.getBoundingClientRect();
@@ -87,18 +76,15 @@ function initializePlayers(players) {
     /* ===== Play / Pause ===== */
     function playPause(){
       if (soundA.paused && soundB.paused) {
-        // start whichever is ahead, theme + highlight to match
         const tA = soundA.currentTime, tB = soundB.currentTime;
         if (tA >= tB) {
           soundA.play();
-          setLight(); setActiveBefore();
-          bButton.disabled = false; aButton.disabled = true;
+          setLight(); setPressed(aButton,true); setPressed(bButton,false);
         } else {
           soundB.play();
-          setDark();  setActiveAfter();
-          bButton.disabled = true;  aButton.disabled = false;
+          setDark();  setPressed(aButton,false); setPressed(bButton,true);
         }
-        stopButton.disabled = false;
+        stopButton.removeAttribute('disabled');
         playButton.innerHTML = pauseIcon;
       } else {
         soundA.pause(); soundB.pause();
@@ -108,25 +94,27 @@ function initializePlayers(players) {
 
     /* ===== Button handlers ===== */
     aButton.addEventListener('click', () => {
-      pauseAll();
-      playButton.innerHTML = pauseIcon;
-      aButton.disabled = true; bButton.disabled = false; stopButton.disabled = false;
+      // make Before active, keep After clickable
+      soundB.pause();
       if (soundB.currentTime > 0) soundA.currentTime = soundB.currentTime;
-      setLight(); setActiveBefore();
-      soundA.play(); soundB.pause();
+      soundA.play();
+      setLight(); setPressed(aButton,true); setPressed(bButton,false);
+      playButton.innerHTML = pauseIcon;
+      stopButton.removeAttribute('disabled');
     });
 
     bButton.addEventListener('click', () => {
-      pauseAll();
-      playButton.innerHTML = pauseIcon;
-      bButton.disabled = true; aButton.disabled = false; stopButton.disabled = false;
+      // make After active, keep Before clickable
+      soundA.pause();
       if (soundA.currentTime > 0) soundB.currentTime = soundA.currentTime;
-      setDark(); setActiveAfter();
-      soundB.play(); soundA.pause();
+      soundB.play();
+      setDark(); setPressed(aButton,false); setPressed(bButton,true);
+      playButton.innerHTML = pauseIcon;
+      stopButton.removeAttribute('disabled');
     });
 
     playButton.addEventListener('click', () => {
-      // pause any other players on page
+      // pause other players
       document.querySelectorAll('audio').forEach(a => {
         if (a !== soundA && a !== soundB) a.pause();
       });
@@ -136,7 +124,14 @@ function initializePlayers(players) {
       playPause();
     });
 
-    stopButton.addEventListener('click', stopSounds);
+    stopButton.addEventListener('click', () => {
+      soundA.pause(); soundB.pause();
+      soundA.currentTime = 0; soundB.currentTime = 0;
+      progressFill.style.width = '0%';
+      setLight(); setPressed(aButton,true); setPressed(bButton,false);
+      playButton.innerHTML = playIcon;
+      stopButton.setAttribute('disabled','');
+    });
 
     /* ===== Progress animation ===== */
     soundA.addEventListener('playing', () => { requestAnimationFrame(stepA); });
@@ -149,22 +144,6 @@ function initializePlayers(players) {
     function stepB(){
       progressFill.style.width = ((soundB.currentTime / soundB.duration) * 100 || 0) + '%';
       if (!soundB.paused) requestAnimationFrame(stepB);
-    }
-
-    /* ===== Helpers ===== */
-    function stopSounds(){
-      playButton.innerHTML = playIcon;
-      aButton.disabled = false; bButton.disabled = true;
-      playButton.disabled = false; stopButton.disabled = true;
-      soundA.pause(); soundB.pause();
-      soundA.currentTime = 0; soundB.currentTime = 0;
-      progressFill.style.width = '0%';
-      setLight(); setActiveBefore(); // back to light + Before highlighted
-    }
-
-    function pauseAll(){
-      document.querySelectorAll('audio').forEach(a => a.pause());
-      document.querySelectorAll('.play__button').forEach(btn => btn.innerHTML = playIcon);
     }
   });
 }

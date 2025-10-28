@@ -248,3 +248,24 @@ button:hover {
 .b__button i, .a__button i {
   color: inherit;       /* match text color */
 }
+/* THEME TOGGLE */
+.player__wrapper.light {
+  background: #e6e6e6;
+  color: #000;
+  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #ffffff;
+}
+
+.player__wrapper.dark {
+  background: #111111;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* progress bar color in both themes (MixedByJack purple) */
+.player__wrapper.light .progress__bar,
+.player__wrapper.dark .progress__bar {
+  background: linear-gradient(360deg, #8A4FFF, #B28DFF);
+}
+
+/* make icons a touch larger */
+.play__button i, .stop__button i { font-size: 1.6rem; }

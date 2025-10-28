@@ -5,9 +5,20 @@ initializePlayers(players);
 function initializePlayers(players) {
   players.forEach((player) => {
     /* ===== Theme helpers ===== */
-    function setLight(el){ el.classList.add('light'); el.classList.remove('dark'); }
-    function setDark(el){  el.classList.add('dark');  el.classList.remove('light'); }
-    setLight(player); // start in light (Before)
+    function setLight(){ player.classList.add('light'); player.classList.remove('dark'); }
+    function setDark(){  player.classList.add('dark');  player.classList.remove('light'); }
+
+    /* ===== Active highlight helpers ===== */
+    const setActiveBefore = () => {
+      aButton.classList.add('is-active');
+      bButton.classList.remove('is-active');
+    };
+    const setActiveAfter = () => {
+      bButton.classList.add('is-active');
+      aButton.classList.remove('is-active');
+    };
+
+    setLight(); // start in light (Before)
 
     /* ===== Audio elements ===== */
     const soundA = document.createElement('audio');
@@ -28,10 +39,10 @@ function initializePlayers(players) {
     const playButton  = player.querySelector('.play__button');
     const stopButton  = player.querySelector('.stop__button');
     const progressEl  = player.querySelector('.progress') || player.querySelector('.progress__container');
-    const progressBar = player.querySelector('.progress__bar');   // (same as progress__fill)
+    const progressBar = player.querySelector('.progress__bar');
     const progressFill= player.querySelector('.progress__fill') || progressBar;
 
-    /* ===== Icons (inline colors for reliability) ===== */
+    /* ===== Icons (inline colors) ===== */
     const playIcon  = '<i class="fa-solid fa-play"  style="color:#8A4FFF;"></i>';
     const pauseIcon = '<i class="fa-solid fa-pause" style="color:#8A4FFF;"></i>';
     const stopIcon  = '<i class="fa-solid fa-stop"  style="color:#C74A4A;"></i>';
@@ -53,6 +64,9 @@ function initializePlayers(players) {
         // ensure icons present
         if (!playButton.innerHTML.trim()) playButton.innerHTML = playIcon;
         if (!stopButton.innerHTML.trim()) stopButton.innerHTML = stopIcon;
+        // initial highlight on Before
+        setActiveBefore();
+        bButton.disabled = true;  // keep current selection in the forefront
       }
     }
 
@@ -73,15 +87,15 @@ function initializePlayers(players) {
     /* ===== Play / Pause ===== */
     function playPause(){
       if (soundA.paused && soundB.paused) {
-        // start whichever is ahead, and theme to match
+        // start whichever is ahead, theme + highlight to match
         const tA = soundA.currentTime, tB = soundB.currentTime;
         if (tA >= tB) {
           soundA.play();
-          setLight(player);
+          setLight(); setActiveBefore();
           bButton.disabled = false; aButton.disabled = true;
         } else {
           soundB.play();
-          setDark(player);
+          setDark();  setActiveAfter();
           bButton.disabled = true;  aButton.disabled = false;
         }
         stopButton.disabled = false;
@@ -98,7 +112,7 @@ function initializePlayers(players) {
       playButton.innerHTML = pauseIcon;
       aButton.disabled = true; bButton.disabled = false; stopButton.disabled = false;
       if (soundB.currentTime > 0) soundA.currentTime = soundB.currentTime;
-      setLight(player);
+      setLight(); setActiveBefore();
       soundA.play(); soundB.pause();
     });
 
@@ -107,7 +121,7 @@ function initializePlayers(players) {
       playButton.innerHTML = pauseIcon;
       bButton.disabled = true; aButton.disabled = false; stopButton.disabled = false;
       if (soundA.currentTime > 0) soundB.currentTime = soundA.currentTime;
-      setDark(player);
+      setDark(); setActiveAfter();
       soundB.play(); soundA.pause();
     });
 
@@ -145,7 +159,7 @@ function initializePlayers(players) {
       soundA.pause(); soundB.pause();
       soundA.currentTime = 0; soundB.currentTime = 0;
       progressFill.style.width = '0%';
-      setLight(player); // back to light theme
+      setLight(); setActiveBefore(); // back to light + Before highlighted
     }
 
     function pauseAll(){

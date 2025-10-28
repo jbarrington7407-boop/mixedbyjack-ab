@@ -1,4 +1,4 @@
-<!-- A/B Audio Player – customized for before/after -->
+<!-- A/B Audio Player – lockstep sync, before/after, theme swap -->
 <div class="abp player__wrapper light-mode"
      data-audio-a="before.wav"
      data-audio-b="after.wav">
@@ -12,133 +12,148 @@
   </div>
 
   <div class="abp__transport">
-    <button class="abp__btn abp__play" data-role="play" disabled>▶️</button>
-    <button class="abp__btn abp__stop" data-role="stop" disabled>⏹️</button>
+    <button class="abp__btn abp__play" data-role="play" disabled aria-label="Play/Pause">▶️</button>
+    <button class="abp__btn abp__stop" data-role="stop" disabled aria-label="Stop">⏹️</button>
   </div>
 </div>
 
 <style>
-/* ====== Base Styles ====== */
 .abp.player__wrapper {
   border-radius: 20px; padding:18px; max-width:520px; margin:12px auto;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition: background .25s ease, color .25s ease;
 }
+.abp.player__wrapper.light-mode { background:#f0f0f0; color:#000; box-shadow:20px 20px 37px #cdcdcd, -20px -20px 37px #fff; }
+.abp.player__wrapper.dark-mode  { background:#111;    color:#fff; box-shadow:0 0 20px rgba(0,0,0,.6); }
 
-/* Light / Dark Mode */
-.abp.player__wrapper.light-mode {
-  background:#f0f0f0; color:#000;
-  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #fff;
-}
-.abp.player__wrapper.dark-mode {
-  background:#1b1b1b; color:#fff;
-  box-shadow: 0 0 20px rgba(0,0,0,0.6);
-}
-
-/* Buttons */
-.abp__abControls, .abp__transport {
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
-}
-.abp__btn {
-  font-size:1rem; border:none; border-radius:10px; padding:.7rem 1rem;
-  background:inherit; color:inherit;
-  box-shadow:inset 5px 5px 10px rgba(0,0,0,0.2), inset -5px -5px 10px rgba(255,255,255,0.1);
-  cursor:pointer; transition:.2s all;
+.abp__abControls, .abp__transport { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+.abp__btn { font-size:1rem; border:none; border-radius:10px; padding:.7rem 1rem; background:inherit; color:inherit;
+  box-shadow:inset 5px 5px 10px rgba(0,0,0,.15), inset -5px -5px 10px rgba(255,255,255,.08);
+  cursor:pointer; transition:transform .15s ease, opacity .15s ease;
 }
 .abp__btn:hover { transform:scale(1.03) }
-.abp__btn:disabled { opacity:0.5; cursor:not-allowed }
+.abp__btn:disabled { opacity:.5; cursor:not-allowed }
 
-/* Progress Bar */
-.abp__progress {
-  height:12px; width:100%; border-radius:10px; margin-bottom:18px; cursor:pointer;
-  background:rgba(255,255,255,0.3);
-}
-.abp.player__wrapper.light-mode .abp__progressFill {
-  background:linear-gradient(360deg,#2da87b,#34dcacfa);
-}
-.abp.player__wrapper.dark-mode .abp__progressFill {
-  background:linear-gradient(360deg,#00ffb3,#00b37a);
-}
-.abp__progressFill { height:100%; width:0%; border-radius:10px; transition:width 0.05s linear; }
+.abp__progress { height:12px; width:100%; border-radius:10px; margin-bottom:18px; cursor:pointer; background:rgba(255,255,255,.3); }
+.abp.player__wrapper.light-mode .abp__progress { background:rgba(0,0,0,.1); }
+.abp.player__wrapper.light-mode .abp__progressFill { background:linear-gradient(360deg,#2da87b,#34dcacfa); }
+.abp.player__wrapper.dark-mode  .abp__progressFill { background:linear-gradient(360deg,#00ffb3,#00b37a); }
+.abp__progressFill { height:100%; width:0%; border-radius:10px; transition:width .05s linear; }
 </style>
 
 <script>
 (function initABPlayers(){
   document.querySelectorAll('.abp.player__wrapper').forEach(function(wrapper){
     const btnBefore = wrapper.querySelector('button[data-role="A"]');
-    const btnAfter = wrapper.querySelector('button[data-role="B"]');
-    const btnPlay = wrapper.querySelector('button[data-role="play"]');
-    const btnStop = wrapper.querySelector('button[data-role="stop"]');
-    const progress = wrapper.querySelector('.abp__progress');
-    const fill = wrapper.querySelector('.abp__progressFill');
+    const btnAfter  = wrapper.querySelector('button[data-role="B"]');
+    const btnPlay   = wrapper.querySelector('button[data-role="play"]');
+    const btnStop   = wrapper.querySelector('button[data-role="stop"]');
+    const progress  = wrapper.querySelector('.abp__progress');
+    const fill      = wrapper.querySelector('.abp__progressFill');
 
     const aURL = wrapper.getAttribute('data-audio-a');
     const bURL = wrapper.getAttribute('data-audio-b');
-    const soundA = new Audio(aURL), soundB = new Audio(bURL);
-    soundA.preload = soundB.preload = "auto";
-    document.body.append(soundA, soundB);
 
-    let readyA = false, readyB = false;
-    function checkReady(){
-      if(readyA && readyB){ btnBefore.disabled = false; btnPlay.disabled = false; }
-    }
-    soundA.addEventListener('canplaythrough',()=>{ readyA=true; checkReady(); });
-    soundB.addEventListener('canplaythrough',()=>{ readyB=true; checkReady(); });
+    // Build audio elements
+    const A = new Audio(aURL);
+    const B = new Audio(bURL);
+    A.preload = B.preload = "auto";
+    A.crossOrigin = B.crossOrigin = "anonymous"; // safer if hosted on a CDN
+    A.hidden = B.hidden = true;
+    document.body.append(A, B);
 
-    // Click to seek
-    progress.addEventListener('click',function(e){
-      const pct = (e.clientX - this.getBoundingClientRect().left) / this.offsetWidth;
-      if(soundA.duration && soundB.duration){
-        soundA.currentTime = soundB.currentTime = pct * soundA.duration;
-        fill.style.width = (pct * 100) + '%';
+    // State
+    let readyA=false, readyB=false, showing='A'; // 'A' = Before (light), 'B' = After (dark)
+    const DRIFT_MAX = 0.03; // seconds; correct if out of tolerance
+
+    // When both are ready, enable controls
+    function tryEnable(){
+      if(readyA && readyB){
+        btnBefore.disabled = false;
+        btnPlay.disabled = false;
       }
-    });
-
-    // Progress animation
-    function step(){
-      const active = !soundA.paused ? soundA : !soundB.paused ? soundB : null;
-      if(active && active.duration) fill.style.width = ((active.currentTime / active.duration) * 100) + '%';
-      requestAnimationFrame(step);
     }
-    step();
+    A.addEventListener('canplaythrough', ()=>{ readyA=true; tryEnable(); });
+    B.addEventListener('canplaythrough', ()=>{ readyB=true; tryEnable(); });
 
-    // Helper to sync and swap theme
-    function playA(){
-      wrapper.classList.remove('dark-mode'); wrapper.classList.add('light-mode');
-      soundB.pause(); soundA.play();
-      btnBefore.disabled=true; btnAfter.disabled=false;
+    // Keep both playing in lockstep; we toggle which one is audible
+    function setTheme(mode){
+      if(mode==='A'){ wrapper.classList.remove('dark-mode'); wrapper.classList.add('light-mode'); }
+      else          { wrapper.classList.remove('light-mode'); wrapper.classList.add('dark-mode'); }
     }
-    function playB(){
-      wrapper.classList.remove('light-mode'); wrapper.classList.add('dark-mode');
-      soundA.pause(); soundB.play();
-      btnAfter.disabled=true; btnBefore.disabled=false;
-    }
+    function showA(){ showing='A'; setTheme('A'); A.muted=false; B.muted=true; btnBefore.disabled=true; btnAfter.disabled=false; }
+    function showB(){ showing='B'; setTheme('B'); A.muted=true;  B.muted=false; btnAfter.disabled=true;  btnBefore.disabled=false; }
 
-    // Button events
-    btnPlay.addEventListener('click',function(){
-      if(soundA.paused && soundB.paused){
-        playA();
-        btnStop.disabled=false;
-        this.textContent='⏸️';
+    // Play/Pause
+    btnPlay.addEventListener('click', async function(){
+      if(A.paused && B.paused){
+        // Start in sync
+        const t = Math.max(A.currentTime, B.currentTime) || 0;
+        A.currentTime = B.currentTime = t;
+        // Unmute current side
+        if(showing==='A'){ showA(); } else { showB(); }
+        try { await Promise.all([A.play(), B.play()]); } catch(e){ /* autoplay guard */ }
+        btnStop.disabled = false;
+        this.textContent = '⏸️';
       } else {
-        soundA.pause(); soundB.pause(); this.textContent='▶️';
+        A.pause(); B.pause();
+        this.textContent = '▶️';
       }
     });
 
-    btnBefore.addEventListener('click',()=>{ playA(); btnPlay.textContent='⏸️'; });
-    btnAfter.addEventListener('click',()=>{ playB(); btnPlay.textContent='⏸️'; });
+    // Before / After switch (mute/unmute, keep both running)
+    btnBefore.addEventListener('click', ()=>{ if(!A.paused || !B.paused){ showA(); } else { showA(); } btnPlay.textContent='⏸️'; });
+    btnAfter .addEventListener('click', ()=>{ if(!A.paused || !B.paused){ showB(); } else { showB(); } btnPlay.textContent='⏸️'; });
 
-    btnStop.addEventListener('click',()=>{
-      soundA.pause(); soundB.pause();
-      soundA.currentTime=soundB.currentTime=0;
-      fill.style.width='0%';
-      btnBefore.disabled=false; btnAfter.disabled=true; btnPlay.textContent='▶️';
-      btnStop.disabled=true;
-      wrapper.classList.remove('dark-mode'); wrapper.classList.add('light-mode');
+    // Stop
+    btnStop.addEventListener('click', ()=>{
+      A.pause(); B.pause();
+      A.currentTime = B.currentTime = 0;
+      fill.style.width = '0%';
+      btnBefore.disabled=false; btnAfter.disabled=true; btnPlay.textContent='▶️'; btnStop.disabled=true;
+      showA(); // default to Before light mode
     });
 
+    // Click-to-seek
+    progress.addEventListener('click', function(e){
+      const rect = this.getBoundingClientRect();
+      const pct = Math.min(Math.max((e.clientX - rect.left)/rect.width, 0), 1);
+      const dur = A.duration || B.duration || 0;
+      if(dur){
+        const t = pct * dur;
+        A.currentTime = B.currentTime = t;
+        fill.style.width = (pct*100)+'%';
+      }
+    });
+
+    // Frame loop: update progress & correct drift if needed
+    function loop(){
+      const active = showing==='A' ? A : B;
+      if(active && active.duration){
+        fill.style.width = ((active.currentTime / active.duration) * 100) + '%';
+      }
+      // Drift correction: keep times aligned
+      if(!A.paused && !B.paused){
+        const diff = Math.abs(A.currentTime - B.currentTime);
+        if(diff > DRIFT_MAX){
+          // snap the quieter one to the louder one (muted one snaps)
+          if(showing==='A'){ B.currentTime = A.currentTime; } else { A.currentTime = B.currentTime; }
+        }
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+
+    // Initial UI state
+    showA();              // start in Before (light) mode
     btnAfter.disabled = true;
     btnStop.disabled = true;
+
+    // If user changes playbackRate somewhere, keep both equal
+    ['ratechange'].forEach(evt=>{
+      A.addEventListener(evt, ()=>{ B.playbackRate = A.playbackRate; });
+      B.addEventListener(evt, ()=>{ A.playbackRate = B.playbackRate; });
+    });
   });
 })();
 </script>

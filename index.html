@@ -2,22 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MixedByJack A/B Player</title>
 
-  <!-- External CSS -->
+  <!-- Your styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Font Awesome for icons -->
-  <script src="https://kit.fontawesome.com/a2e0ad6f05.js" crossorigin="anonymous"></script>
+  <!-- Font Awesome (icons) — using CDN so no kit key needed -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 </head>
 <body>
 
+  <!-- Start in light mode; JS will toggle light/dark -->
   <div class="player__wrapper light"
        data-audio-a="before.wav"
        data-audio-b="after.wav">
 
-    <!-- NOTE: keep both classes so JS can find the progress element -->
+    <!-- IMPORTANT: keep the .progress class so JS binds the seek handler -->
     <div class="progress__container progress">
       <div class="progress__bar progress__fill"></div>
     </div>

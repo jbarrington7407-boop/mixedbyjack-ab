@@ -3,18 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A/B Audio Player</title>
+  <title>MixedByJack A/B Player</title>
+
+  <!-- Load external CSS -->
   <link rel="stylesheet" href="style.css" />
-  <!-- Font Awesome for icons (optional) -->
+
+  <!-- Font Awesome for play/pause/stop icons -->
   <script src="https://kit.fontawesome.com/a2e0ad6f05.js" crossorigin="anonymous"></script>
+
+  <style>
+    /* === Icon colors and sizes (MixedByJack theme) === */
+    .play__button i {
+      color: #8A4FFF; /* MixedByJack purple */
+      font-size: 1.6rem;
+      transition: color 0.2s ease;
+    }
+    .play__button:hover i {
+      color: #B28DFF; /* lighter purple hover */
+    }
+    .stop__button i {
+      color: #C74A4A; /* subtle red for stop */
+      font-size: 1.6rem;
+      transition: color 0.2s ease;
+    }
+    .stop__button:hover i {
+      color: #FF6B6B; /* brighter red hover */
+    }
+  </style>
 </head>
+
 <body>
 
   <div class="player__wrapper"
        data-audio-a="before.wav"
        data-audio-b="after.wav">
 
-    <!-- add .progress so JS finds it -->
+    <!-- Add .progress class so JS recognizes it -->
     <div class="progress__container progress">
       <div class="progress__bar progress__fill"></div>
     </div>
@@ -25,12 +49,24 @@
     </div>
 
     <div class="play__stop__controls">
-      <button class="play__button" disabled><i class="fa-solid fa-play"></i></button>
-      <button class="stop__button" disabled><i class="fa-solid fa-stop"></i></button>
+      <button class="play__button" disabled>
+        <i class="fa-solid fa-play"></i>
+      </button>
+      <button class="stop__button" disabled>
+        <i class="fa-solid fa-stop"></i>
+      </button>
     </div>
   </div>
 
+  <!-- External JS -->
   <script src="ab-player.js"></script>
+
+  <script>
+    /* Override the JS icon variables with custom-colored icons */
+    const playIcon = '<i class="fa-solid fa-play" style="color:#8A4FFF;"></i>';
+    const pauseIcon = '<i class="fa-solid fa-pause" style="color:#8A4FFF;"></i>';
+    const stopIcon = '<i class="fa-solid fa-stop" style="color:#C74A4A;"></i>';
+  </script>
+
 </body>
 </html>
-  

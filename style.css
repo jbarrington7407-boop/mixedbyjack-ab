@@ -23,7 +23,7 @@ body {
   transition: background .25s ease, color .25s ease, box-shadow .25s ease;
 }
 .player__wrapper.light {
-  background:#f0f0f0; color:#000;
+  background:#f0f0f0; color:#111;
   box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #ffffff;
 }
 .player__wrapper.dark {
@@ -55,14 +55,13 @@ body {
   transition: width .05s linear;
 }
 
-/* Buttons (theme-aware) */
+/* Buttons */
 .ab__controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 12px;
 }
-
 button {
   font-size: 1rem;
   border: none;
@@ -76,38 +75,19 @@ button {
 }
 button:hover { transform: scale(1.03); }
 
-button:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-  box-shadow: inset 7px 7px 15px rgba(0,0,0,.15), inset -7px -7px 15px rgba(255,255,255,.1);
-}
+/* Theme-aware button surfaces */
+.player__wrapper.light button { background: #f4f4f4; color: #111; }
+.player__wrapper.dark  button { background: #111;   color: #fff; }
 
-/* Theme-aware button surface + readable text */
-.player__wrapper.light button {
-  background: #f4f4f4;
-  color: #111;
-}
-.player__wrapper.dark button {
-  background: #111;     /* buttons go dark too */
-  color: #fff;          /* white text for visibility */
-}
-
-/* Active (highlighted) state for Before/After */
-.a__button.is-active,
-.b__button.is-active {
-  /* make the active one pop — purple fill, white text, slightly lifted */
+/* Active (highlighted) state for Before/After via aria-pressed */
+.a__button[aria-pressed="true"],
+.b__button[aria-pressed="true"] {
   background: linear-gradient(180deg, #8A4FFF, #6E35F8);
   color: #fff !important;
   box-shadow:
     0 8px 18px rgba(138, 79, 255, 0.35),
-    inset 0 0 0 1px rgba(255,255,255,0.15);
+    inset 0 0 0 1px rgba(255,255,255,0.18);
   transform: translateY(-1px);
-  opacity: 1 !important; /* override disabled opacity if active is also disabled */
-}
-
-/* Ensure disabled active button still looks active */
-button.is-active:disabled {
-  opacity: 1 !important;
 }
 
 /* Transport */
@@ -117,18 +97,16 @@ button.is-active:disabled {
   gap: 12px;
 }
 .play__button i {
-  color:#8A4FFF; /* purple play/pause */
+  color:#8A4FFF;
   font-size:1.6rem;
 }
 .play__button:hover i { color:#B28DFF; }
 .stop__button i {
-  color:#C74A4A; /* soft red stop */
+  color:#C74A4A;
   font-size:1.6rem;
 }
 .stop__button:hover i { color:#FF6B6B; }
 
-/* Focus for accessibility */
-button:focus-visible {
-  outline: 2px solid #8A4FFF;
-  outline-offset: 2px;
-}
+/* States */
+button:disabled { opacity: .5; cursor: not-allowed; }
+button:focus-visible { outline: 2px solid #8A4FFF; outline-offset: 2px; }

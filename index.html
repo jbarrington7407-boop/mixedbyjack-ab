@@ -4,11 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>A/B Audio Player</title>
-
-  <!-- ✅ Link your external CSS -->
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Optional: Font Awesome for play/pause/stop icons -->
+  <link rel="stylesheet" href="style.css" />
+  <!-- Font Awesome for icons (optional) -->
   <script src="https://kit.fontawesome.com/a2e0ad6f05.js" crossorigin="anonymous"></script>
 </head>
 <body>
@@ -17,7 +14,8 @@
        data-audio-a="before.wav"
        data-audio-b="after.wav">
 
-    <div class="progress__container">
+    <!-- add .progress so JS finds it -->
+    <div class="progress__container progress">
       <div class="progress__bar progress__fill"></div>
     </div>
 
@@ -32,6 +30,7 @@
     </div>
   </div>
 
-  <!-- ✅ Link your external JavaScript -->
   <script src="ab-player.js"></script>
+</body>
+</html>
   

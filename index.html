@@ -5,36 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MixedByJack A/B Player</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
-
   <!-- Font Awesome (icons) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 </head>
 <body>
 
-  <!-- Start in light mode; JS will toggle light/dark + active highlight -->
   <div class="player__wrapper light"
        data-audio-a="before.wav"
        data-audio-b="after.wav">
 
-    <!-- Keep the .progress class so JS binds seek handler -->
     <div class="progress__container progress">
       <div class="progress__bar progress__fill"></div>
     </div>
 
-    <div class="ab__controls">
-      <button class="a__button" disabled>Before</button>
-      <button class="b__button" disabled>After</button>
+    <div class="ab__controls" role="group" aria-label="A/B comparison">
+      <button class="a__button" aria-pressed="true">Before</button>
+      <button class="b__button" aria-pressed="false">After</button>
     </div>
 
     <div class="play__stop__controls">
-      <button class="play__button" disabled><i class="fa-solid fa-play"></i></button>
-      <button class="stop__button" disabled><i class="fa-solid fa-stop"></i></button>
+      <button class="play__button" aria-label="Play/Pause"><i class="fa-solid fa-play"></i></button>
+      <button class="stop__button" aria-label="Stop"><i class="fa-solid fa-stop"></i></button>
     </div>
   </div>
 
-  <!-- Player logic -->
   <script src="ab-player.js"></script>
 </body>
 </html>

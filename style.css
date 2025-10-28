@@ -196,7 +196,7 @@ button:hover {
 }
 
 .progress__bar {
-  background: linear-gradient(360deg, #2da87b, #34dcacfa);
+  background: linear-gradient(360deg, #8A4FFF, #B28DFF);
   border-radius: 12px;
   transition: all ease-in-out 0.03s;
 }

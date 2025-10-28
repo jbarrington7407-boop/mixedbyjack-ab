@@ -1,44 +1,72 @@
-<!-- A/B Audio Player – customized for before/after.wav -->
-<div class="abp player__wrapper"
+<!-- A/B Audio Player – customized for before/after -->
+<div class="abp player__wrapper light-mode"
      data-audio-a="before.wav"
      data-audio-b="after.wav">
-  <div class="abp__progress" id="progress">
-    <div class="abp__progressFill" id="progress__fill"></div>
+  <div class="abp__progress">
+    <div class="abp__progressFill"></div>
   </div>
+
   <div class="abp__abControls">
-    <button class="abp__btn" data-role="A" disabled>A</button>
-    <button class="abp__btn" data-role="B" disabled>B</button>
+    <button class="abp__btn" data-role="A" disabled>Before</button>
+    <button class="abp__btn" data-role="B" disabled>After</button>
   </div>
+
   <div class="abp__transport">
-    <button class="abp__btn abp__play" data-role="play" disabled>Play</button>
-    <button class="abp__btn abp__stop" data-role="stop" disabled>Stop</button>
+    <button class="abp__btn abp__play" data-role="play" disabled>▶️</button>
+    <button class="abp__btn abp__stop" data-role="stop" disabled>⏹️</button>
   </div>
 </div>
 
 <style>
+/* ====== Base Styles ====== */
 .abp.player__wrapper {
-  border-radius: 20px; background:#e6e6e6; padding:18px; max-width:520px;
-  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #fff; margin:12px auto;
+  border-radius: 20px; padding:18px; max-width:520px; margin:12px auto;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
-.abp__abControls, .abp__transport { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px }
+
+/* Light / Dark Mode */
+.abp.player__wrapper.light-mode {
+  background:#f0f0f0; color:#000;
+  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #fff;
+}
+.abp.player__wrapper.dark-mode {
+  background:#1b1b1b; color:#fff;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+}
+
+/* Buttons */
+.abp__abControls, .abp__transport {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
+}
 .abp__btn {
-  font-size:1rem; border:none; border-radius:10px; padding:.7rem 1rem; background:#e6e6e6; color:#666;
-  box-shadow:7px 7px 15px #cdcdcd, -7px -7px 15px #fff; cursor:pointer; transition:.2s all;
+  font-size:1rem; border:none; border-radius:10px; padding:.7rem 1rem;
+  background:inherit; color:inherit;
+  box-shadow:inset 5px 5px 10px rgba(0,0,0,0.2), inset -5px -5px 10px rgba(255,255,255,0.1);
+  cursor:pointer; transition:.2s all;
 }
-.abp__btn:hover { box-shadow:4px 4px 15px #cdcdcd, -4px -4px 15px #fff }
-.abp__btn:disabled { color:#bbb; box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #fff; cursor:not-allowed }
-.abp__stop { color:#8a5b5b }
-.abp__progress { height:12px; width:100%; border-radius:10px; margin-bottom:18px;
-  background:#e6e6e6; box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #fff; cursor:pointer }
-.abp__progressFill { height:100%; width:0%; border-radius:10px; background:linear-gradient(360deg,#2da87b,#34dcacfa) }
+.abp__btn:hover { transform:scale(1.03) }
+.abp__btn:disabled { opacity:0.5; cursor:not-allowed }
+
+/* Progress Bar */
+.abp__progress {
+  height:12px; width:100%; border-radius:10px; margin-bottom:18px; cursor:pointer;
+  background:rgba(255,255,255,0.3);
+}
+.abp.player__wrapper.light-mode .abp__progressFill {
+  background:linear-gradient(360deg,#2da87b,#34dcacfa);
+}
+.abp.player__wrapper.dark-mode .abp__progressFill {
+  background:linear-gradient(360deg,#00ffb3,#00b37a);
+}
+.abp__progressFill { height:100%; width:0%; border-radius:10px; transition:width 0.05s linear; }
 </style>
 
 <script>
 (function initABPlayers(){
   document.querySelectorAll('.abp.player__wrapper').forEach(function(wrapper){
-    const btnA = wrapper.querySelector('button[data-role="A"]');
-    const btnB = wrapper.querySelector('button[data-role="B"]');
+    const btnBefore = wrapper.querySelector('button[data-role="A"]');
+    const btnAfter = wrapper.querySelector('button[data-role="B"]');
     const btnPlay = wrapper.querySelector('button[data-role="play"]');
     const btnStop = wrapper.querySelector('button[data-role="stop"]');
     const progress = wrapper.querySelector('.abp__progress');
@@ -46,67 +74,71 @@
 
     const aURL = wrapper.getAttribute('data-audio-a');
     const bURL = wrapper.getAttribute('data-audio-b');
-    const soundA = new Audio(); soundA.src = aURL; soundA.preload = "auto";
-    const soundB = new Audio(); soundB.src = bURL; soundB.preload = "auto";
-    soundA.hidden = soundB.hidden = true; document.body.append(soundA, soundB);
+    const soundA = new Audio(aURL), soundB = new Audio(bURL);
+    soundA.preload = soundB.preload = "auto";
+    document.body.append(soundA, soundB);
 
     let readyA = false, readyB = false;
     function checkReady(){
-      if(readyA && readyB){ btnA.disabled = false; btnPlay.disabled = false; }
+      if(readyA && readyB){ btnBefore.disabled = false; btnPlay.disabled = false; }
     }
-    soundA.addEventListener('canplaythrough', () => { if(!readyA){ readyA = true; checkReady(); }});
-    soundB.addEventListener('canplaythrough', () => { if(!readyB){ readyB = true; checkReady(); }});
+    soundA.addEventListener('canplaythrough',()=>{ readyA=true; checkReady(); });
+    soundB.addEventListener('canplaythrough',()=>{ readyB=true; checkReady(); });
 
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      btnPlay.disabled = false;
-    }
-
-    progress.addEventListener('click', function(e){
-      const rect = this.getBoundingClientRect();
-      const pct = (e.clientX - rect.left) / rect.width;
-      if (soundA.duration && soundB.duration){
-        soundA.currentTime = pct * soundA.duration;
-        soundB.currentTime = pct * soundB.duration;
+    // Click to seek
+    progress.addEventListener('click',function(e){
+      const pct = (e.clientX - this.getBoundingClientRect().left) / this.offsetWidth;
+      if(soundA.duration && soundB.duration){
+        soundA.currentTime = soundB.currentTime = pct * soundA.duration;
         fill.style.width = (pct * 100) + '%';
       }
     });
 
-    function stepA(){ fill.style.width = ((soundA.currentTime / soundA.duration) * 100 || 0) + '%'; requestAnimationFrame(stepA); }
-    function stepB(){ fill.style.width = ((soundB.currentTime / soundB.duration) * 100 || 0) + '%'; requestAnimationFrame(stepB); }
-    soundA.addEventListener('playing', stepA);
-    soundB.addEventListener('playing', stepB);
-
-    function syncTo(other, target){
-      if (other.currentTime > 0) target.currentTime = other.currentTime;
+    // Progress animation
+    function step(){
+      const active = !soundA.paused ? soundA : !soundB.paused ? soundB : null;
+      if(active && active.duration) fill.style.width = ((active.currentTime / active.duration) * 100) + '%';
+      requestAnimationFrame(step);
     }
-    btnPlay.addEventListener('click', function(){
-      if (soundA.paused && soundB.paused){
-        (soundA.currentTime >= soundB.currentTime ? soundA : soundB).play();
-        btnA.disabled = true; btnB.disabled = false; btnStop.disabled = false;
-        this.textContent = 'Pause';
+    step();
+
+    // Helper to sync and swap theme
+    function playA(){
+      wrapper.classList.remove('dark-mode'); wrapper.classList.add('light-mode');
+      soundB.pause(); soundA.play();
+      btnBefore.disabled=true; btnAfter.disabled=false;
+    }
+    function playB(){
+      wrapper.classList.remove('light-mode'); wrapper.classList.add('dark-mode');
+      soundA.pause(); soundB.play();
+      btnAfter.disabled=true; btnBefore.disabled=false;
+    }
+
+    // Button events
+    btnPlay.addEventListener('click',function(){
+      if(soundA.paused && soundB.paused){
+        playA();
+        btnStop.disabled=false;
+        this.textContent='⏸️';
       } else {
-        soundA.pause(); soundB.pause(); this.textContent = 'Play';
+        soundA.pause(); soundB.pause(); this.textContent='▶️';
       }
     });
 
-    btnA.addEventListener('click', function(){
-      this.disabled = true; btnB.disabled = false; btnPlay.textContent = 'Pause'; btnStop.disabled = false;
-      syncTo(soundB, soundA); soundA.play(); soundB.pause();
+    btnBefore.addEventListener('click',()=>{ playA(); btnPlay.textContent='⏸️'; });
+    btnAfter.addEventListener('click',()=>{ playB(); btnPlay.textContent='⏸️'; });
+
+    btnStop.addEventListener('click',()=>{
+      soundA.pause(); soundB.pause();
+      soundA.currentTime=soundB.currentTime=0;
+      fill.style.width='0%';
+      btnBefore.disabled=false; btnAfter.disabled=true; btnPlay.textContent='▶️';
+      btnStop.disabled=true;
+      wrapper.classList.remove('dark-mode'); wrapper.classList.add('light-mode');
     });
 
-    btnB.addEventListener('click', function(){
-      this.disabled = true; btnA.disabled = false; btnPlay.textContent = 'Pause'; btnStop.disabled = false;
-      syncTo(soundA, soundB); soundB.play(); soundA.pause();
-    });
-
-    btnStop.addEventListener('click', function(){
-      soundA.pause(); soundB.pause(); soundA.currentTime = 0; soundB.currentTime = 0;
-      btnA.disabled = false; btnB.disabled = true; btnPlay.disabled = false; this.disabled = true;
-      btnPlay.textContent = 'Play'; fill.style.width = '0%';
-    });
-
-    btnB.disabled = true; btnStop.disabled = true;
+    btnAfter.disabled = true;
+    btnStop.disabled = true;
   });
 })();
 </script>
-

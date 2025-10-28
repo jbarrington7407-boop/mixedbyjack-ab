@@ -7,7 +7,7 @@ html, body { height: 100%; }
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
   background: #e6e6e6;
   display: grid;
   place-items: center;
@@ -27,7 +27,7 @@ body {
   box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #ffffff;
 }
 .player__wrapper.dark {
-  background:#111111; color:#fff;
+  background:#0d0d0d; color:#fff;
   box-shadow: 0 0 20px rgba(0,0,0,.6);
 }
 
@@ -48,7 +48,6 @@ body {
 
 /* Purple brand bar (fill) */
 .progress__bar {
-  /* MixedByJack purple gradient */
   background: linear-gradient(360deg, #8A4FFF, #B28DFF);
   height: 100%;
   width: 0%;
@@ -56,13 +55,14 @@ body {
   transition: width .05s linear;
 }
 
-/* AB controls */
+/* Buttons (theme-aware) */
 .ab__controls {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 12px;
 }
+
 button {
   font-size: 1rem;
   border: none;
@@ -72,12 +72,42 @@ button {
   color: inherit;
   box-shadow: inset 5px 5px 10px rgba(0,0,0,.15), inset -5px -5px 10px rgba(255,255,255,.08);
   cursor: pointer;
-  transition: transform .15s ease, opacity .15s ease, box-shadow .2s ease;
+  transition: transform .15s ease, opacity .15s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
 }
 button:hover { transform: scale(1.03); }
+
 button:disabled {
-  opacity: .5; cursor: not-allowed;
+  opacity: .5;
+  cursor: not-allowed;
   box-shadow: inset 7px 7px 15px rgba(0,0,0,.15), inset -7px -7px 15px rgba(255,255,255,.1);
+}
+
+/* Theme-aware button surface + readable text */
+.player__wrapper.light button {
+  background: #f4f4f4;
+  color: #111;
+}
+.player__wrapper.dark button {
+  background: #111;     /* buttons go dark too */
+  color: #fff;          /* white text for visibility */
+}
+
+/* Active (highlighted) state for Before/After */
+.a__button.is-active,
+.b__button.is-active {
+  /* make the active one pop — purple fill, white text, slightly lifted */
+  background: linear-gradient(180deg, #8A4FFF, #6E35F8);
+  color: #fff !important;
+  box-shadow:
+    0 8px 18px rgba(138, 79, 255, 0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+  opacity: 1 !important; /* override disabled opacity if active is also disabled */
+}
+
+/* Ensure disabled active button still looks active */
+button.is-active:disabled {
+  opacity: 1 !important;
 }
 
 /* Transport */
@@ -89,53 +119,16 @@ button:disabled {
 .play__button i {
   color:#8A4FFF; /* purple play/pause */
   font-size:1.6rem;
-  transition: color .2s ease;
 }
 .play__button:hover i { color:#B28DFF; }
 .stop__button i {
   color:#C74A4A; /* soft red stop */
   font-size:1.6rem;
-  transition: color .2s ease;
 }
 .stop__button:hover i { color:#FF6B6B; }
-/* === Theme-aware button surfaces === */
-.player__wrapper.light button {
-  background: #f0f0f0;          /* light button on light bg */
-  color: #111;                  /* readable text */
-  box-shadow: inset 5px 5px 10px rgba(0,0,0,.15),
-              inset -5px -5px 10px rgba(255,255,255,.08);
-}
 
-.player__wrapper.dark button {
-  background: #0f0f0f;          /* near-black button on dark bg */
-  color: #fff;                  /* readable text */
-  box-shadow: inset 5px 5px 10px rgba(0,0,0,.40),
-              inset -5px -5px 10px rgba(255,255,255,.03);
+/* Focus for accessibility */
+button:focus-visible {
+  outline: 2px solid #8A4FFF;
+  outline-offset: 2px;
 }
-
-.player__wrapper.light button:hover {
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,.18),
-              inset -4px -4px 10px rgba(255,255,255,.10);
-  transform: scale(1.03);
-}
-
-.player__wrapper.dark button:hover {
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,.55),
-              inset -4px -4px 10px rgba(255,255,255,.05);
-  transform: scale(1.03);
-}
-
-/* Disabled state contrast in both themes */
-.player__wrapper.light button:disabled {
-  color: #8a8a8a;
-  background: #eaeaea;
-}
-
-.player__wrapper.dark button:disabled {
-  color: rgba(255,255,255,.55);
-  background: #151515;
-}
-
-/* Keep icon colors as you set (purple play/pause, red stop) */
-.play__button i { color:#8A4FFF; }
-.stop__button i { color:#C74A4A; }

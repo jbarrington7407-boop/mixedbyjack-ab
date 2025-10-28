@@ -3,10 +3,10 @@ initializePlayers(players);
 
 function initializePlayers(players) {
   players.forEach((player) => {
-    /* ===== Theme helpers ===== */
+    /* ===== Theme helpers (dark gray -> black) ===== */
     const setLight = () => { player.classList.add('light'); player.classList.remove('dark'); };
     const setDark  = () => { player.classList.add('dark');  player.classList.remove('light'); };
-    setLight(); // start light (Before)
+    setLight(); // start in dark gray (BEFORE)
 
     /* ===== Audio elements ===== */
     const soundA = document.createElement('audio');
@@ -31,9 +31,9 @@ function initializePlayers(players) {
     const pauseIcon = '<i class="fa-solid fa-pause" style="color:#8A4FFF;"></i>';
     const stopIcon  = '<i class="fa-solid fa-stop"  style="color:#C74A4A;"></i>';
 
-    // Allow mobile to hit play early
+    // Allow mobile to tap play early
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-      playButton.disabled = false;
+      playButton.removeAttribute('disabled');
     }
 
     // Loading state
@@ -47,10 +47,9 @@ function initializePlayers(players) {
         bButton.removeAttribute('disabled');
         playButton.removeAttribute('disabled');
         stopButton.setAttribute('disabled','');
-        // ensure icons
         playButton.innerHTML = playIcon;
         stopButton.innerHTML = stopIcon;
-        // initial state: Before is active
+        // initial state: BEFORE is active
         setPressed(aButton, true);
         setPressed(bButton, false);
       }
@@ -94,7 +93,7 @@ function initializePlayers(players) {
 
     /* ===== Button handlers ===== */
     aButton.addEventListener('click', () => {
-      // make Before active, keep After clickable
+      // Activate BEFORE
       soundB.pause();
       if (soundB.currentTime > 0) soundA.currentTime = soundB.currentTime;
       soundA.play();
@@ -104,7 +103,7 @@ function initializePlayers(players) {
     });
 
     bButton.addEventListener('click', () => {
-      // make After active, keep Before clickable
+      // Activate AFTER
       soundA.pause();
       if (soundA.currentTime > 0) soundB.currentTime = soundA.currentTime;
       soundB.play();
@@ -114,7 +113,7 @@ function initializePlayers(players) {
     });
 
     playButton.addEventListener('click', () => {
-      // pause other players
+      // pause other players if any
       document.querySelectorAll('audio').forEach(a => {
         if (a !== soundA && a !== soundB) a.pause();
       });

@@ -5,27 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MixedByJack A/B Player</title>
 
-  <!-- Your styles -->
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Font Awesome (icons) — using CDN so no kit key needed -->
+  <!-- Font Awesome (icons) -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 </head>
 <body>
 
-  <!-- Start in light mode; JS will toggle light/dark -->
+  <!-- Start in light mode; JS will toggle light/dark + active highlight -->
   <div class="player__wrapper light"
        data-audio-a="before.wav"
        data-audio-b="after.wav">
 
-    <!-- IMPORTANT: keep the .progress class so JS binds the seek handler -->
+    <!-- Keep the .progress class so JS binds seek handler -->
     <div class="progress__container progress">
       <div class="progress__bar progress__fill"></div>
     </div>
 
     <div class="ab__controls">
-      <button class="a__button" disabled>After</button>
-      <button class="b__button" disabled>Before</button>
+      <button class="a__button" disabled>Before</button>
+      <button class="b__button" disabled>After</button>
     </div>
 
     <div class="play__stop__controls">

@@ -4,16 +4,20 @@ initializePlayers(players);
 
 function initializePlayers(players) {
   players.forEach((player) => {
+    /* ========= THEME HELPERS ========= */
+    function setLight(el) { el.classList.add('light'); el.classList.remove('dark'); }
+    function setDark(el)  { el.classList.add('dark');  el.classList.remove('light'); }
+    // Start in light mode (Before)
+    setLight(player);
+
     //Set up audio elements
     var soundA = document.createElement('audio');
-    //Set audio A src here
     soundA.src = player.getAttribute('data-audio-a');
     soundA.preload = 'auto';
     soundA.setAttribute('hidden', 'true');
     document.body.append(soundA);
 
     var soundB = document.createElement('audio');
-    //Set audio B src here
     soundB.src = player.getAttribute('data-audio-b');
     soundB.preload = 'auto';
     soundB.setAttribute('hidden', 'true');
@@ -27,9 +31,10 @@ function initializePlayers(players) {
     const progressBar = player.querySelector('.progress__bar');
     const progressFill = player.querySelector('.progress__fill');
 
-    const playIcon = '<i class="fa-solid fa-play"></i>';
-    const pauseIcon = '<i class="fa-solid fa-pause"></i>';
-    const stopIcon = '<i class="fa-solid fa-stop"></i>';
+    // Icons (colored inline for reliability)
+    const playIcon  = '<i class="fa-solid fa-play"  style="color:#8A4FFF;"></i>';
+    const pauseIcon = '<i class="fa-solid fa-pause" style="color:#8A4FFF;"></i>';
+    const stopIcon  = '<i class="fa-solid fa-stop"  style="color:#C74A4A;"></i>';
 
     //Check for mobile to enable audio playback without waiting for download status.
     if (
@@ -45,7 +50,6 @@ function initializePlayers(players) {
     var soundBReady = false;
 
     //When audio can play through (loaded), run the function to enable buttons
-    //The canplaythrough event will fire every time the audio switches, so the !soundA/BReady prevents additional checks
     soundA.oncanplaythrough = function () {
       if (!soundAReady) {
         soundAReady = true;
@@ -62,38 +66,48 @@ function initializePlayers(players) {
     // Check if both A & B are ready and enable the correct buttons
     function audioIsReady() {
       if (soundAReady && soundBReady) {
-        console.log('...audio loaded!');
+        // console.log('...audio loaded!');
         aButton.disabled = false;
         playButton.disabled = false;
+        // ensure initial icons are present
+        if (!playButton.innerHTML.trim()) playButton.innerHTML = playIcon;
+        if (!stopButton.innerHTML.trim()) stopButton.innerHTML = stopIcon;
       } else {
-        console.log('Audio loading...');
+        // console.log('Audio loading...');
       }
     }
 
-    const progress = player.querySelector('.progress');
+    // Robust progress element selection (supports either class)
+    const progress = player.querySelector('.progress') || player.querySelector('.progress__container');
+
     // Listen for click on entire progress bar div (to allow skipping ahead)
-    progress.addEventListener('click', function (event) {
-      // Get X coordinate of click in div
-      var rect = this.getBoundingClientRect();
-      // Convert click position to percentage value
-      var percentage = (event.clientX - rect.left) / this.offsetWidth;
-      // Seek to the percentage converted to seconds
-      soundA.currentTime = percentage * soundA.duration;
-      soundB.currentTime = percentage * soundB.duration;
-    });
+    if (progress) {
+      progress.addEventListener('click', function (event) {
+        var rect = this.getBoundingClientRect();
+        var percentage = (event.clientX - rect.left) / this.offsetWidth;
+        percentage = Math.min(Math.max(percentage, 0), 1);
+        // Keep A and B aligned
+        const targetTime = percentage * (soundA.duration || soundB.duration || 0);
+        soundA.currentTime = targetTime;
+        soundB.currentTime = targetTime;
+      });
+    }
 
     //Play/Stop correct audio and toggle A/B, Play/Pause, and Stop buttons
     function playPause() {
       if (soundA.paused & soundB.paused) {
+        // Decide which to start from whichever is ahead, then set theme accordingly
         let soundATime = soundA.currentTime;
         let soundBTime = soundB.currentTime;
         if (soundATime >= soundBTime) {
           soundA.play();
+          setLight(player); // Before
           bButton.disabled = false;
           aButton.disabled = true;
           playButton.innerHTML = pauseIcon;
         } else {
           soundB.play();
+          setDark(player); // After
           bButton.disabled = true;
           aButton.disabled = false;
           playButton.innerHTML = pauseIcon;
@@ -112,14 +126,13 @@ function initializePlayers(players) {
       aButton.disabled = true;
       bButton.disabled = false;
       stopButton.disabled = false;
+      // keep times aligned and set light theme
       if (soundB.currentTime > 0) {
         soundA.currentTime = soundB.currentTime;
-        soundA.play();
-        soundB.pause();
-      } else {
-        soundA.play();
-        soundB.pause();
       }
+      setLight(player);
+      soundA.play();
+      soundB.pause();
     });
 
     bButton.addEventListener('click', (e) => {
@@ -127,15 +140,14 @@ function initializePlayers(players) {
       playButton.innerHTML = pauseIcon;
       bButton.disabled = true;
       aButton.disabled = false;
-
       stopButton.disabled = false;
+      // keep times aligned and set dark theme
       if (soundA.currentTime > 0) {
         soundB.currentTime = soundA.currentTime;
-        soundB.play();
-        soundA.pause();
-      } else {
-        soundB.play();
       }
+      setDark(player);
+      soundB.play();
+      soundA.pause();
     });
 
     playButton.addEventListener('click', (e) => {
@@ -159,14 +171,14 @@ function initializePlayers(players) {
     });
 
     soundA.addEventListener('playing', (e) => {
-      console.log('playing a');
+      // console.log('playing a');
       progressFill.style.width =
         ((soundA.currentTime / soundA.duration) * 100 || 0) + '%';
       requestAnimationFrame(stepA);
     });
 
     soundB.addEventListener('playing', (e) => {
-      console.log('playing b');
+      // console.log('playing b');
       progressFill.style.width =
         ((soundB.currentTime / soundB.duration) * 100 || 0) + '%';
       requestAnimationFrame(stepB);
@@ -182,6 +194,8 @@ function initializePlayers(players) {
       soundA.currentTime = 0;
       soundB.pause();
       soundB.currentTime = 0;
+      // Return to light theme on stop
+      setLight(player);
     };
 
     function pauseAll() {

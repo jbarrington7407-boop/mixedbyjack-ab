@@ -224,3 +224,27 @@ button:hover {
     grid-template-columns: 1fr;
   }
 }
+/* === Icon colors and sizes (MixedByJack theme) === */
+.play__button i {
+  color: #8A4FFF;      /* MixedByJack purple */
+  font-size: 1.6rem;
+  transition: color 0.2s ease;
+}
+
+.play__button:hover i {
+  color: #B28DFF;      /* lighter purple on hover */
+}
+
+.stop__button i {
+  color: #C74A4A;      /* subtle red for stop */
+  font-size: 1.6rem;
+  transition: color 0.2s ease;
+}
+
+.stop__button:hover i {
+  color: #FF6B6B;      /* brighter red hover */
+}
+
+.b__button i, .a__button i {
+  color: inherit;       /* match text color */
+}

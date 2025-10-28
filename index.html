@@ -1,233 +1,112 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Before / After Player</title>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Expires" content="0" />
-<style>
-  :root{
-    --bg:#0a0a0c;
-    --panel:#101114;
-    --panel-2:#151821;
-    --text:#e9e9ef;
-    --muted:#a7adbb;
-    --border:#232533;
-    --accent:#a855f7;  /* Purple accent */
-    --accent-2:#9333ea;/* Hover/deeper purple */
-    --track:#2a2d3a;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;background:var(--bg);color:var(--text);
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-    display:flex;align-items:center;justify-content:center;
-    padding:28px;
-  }
-  .player{
-    width:min(920px,96vw);
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:18px;
-    box-shadow:0 20px 60px rgba(0,0,0,.35);
-    padding:26px 22px;
-  }
-  .head{
-    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;
-  }
-  h1{margin:0;font-size:22px;font-weight:700;letter-spacing:.2px}
-  .sub{margin:6px 0 0;color:var(--muted);font-size:14px}
-  .row{display:flex;align-items:center;gap:12px;margin:14px 0}
-  .grow{flex:1 1 auto}
-  .btn{
-    appearance:none;border:1px solid var(--border);
-    background:var(--panel-2);color:var(--text);
-    padding:12px 18px;border-radius:14px;cursor:pointer;
-    font-weight:700;transition:.15s transform,.15s background,.15s border-color;
-  }
-  .btn:hover{transform:translateY(-1px);border-color:#2f3141;background:#191c26}
-  /* Segmented toggle (BEFORE | AFTER) */
-  .seg{
-    display:inline-flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#0f1118;
-  }
-  .seg button{
-    border:0;background:transparent;color:var(--muted);
-    padding:10px 18px;font-weight:800;letter-spacing:.3px;cursor:pointer;
-    transition:.15s background,.15s color;
-  }
-  .seg button.active{background:var(--accent);color:#180a2b}
-  .seg button:not(.active):hover{color:#d8def0}
-  /* Transport / seek */
-  .seek-wrap{display:flex;align-items:center;gap:12px}
-  .time{min-width:54px;text-align:right;color:#cfd3df;font-variant-numeric:tabular-nums}
-  input[type="range"]{
-    width:100%;appearance:none;height:6px;border-radius:999px;background:var(--track);outline:none;
-  }
-  input[type="range"]::-webkit-slider-thumb{
-    appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid #000;cursor:pointer;margin-top:-6px;
-    box-shadow:0 0 0 6px rgba(168,85,247,.15);
-  }
-  input[type="range"]::-moz-range-thumb{
-    width:18px;height:18px;border:0;border-radius:50%;background:var(--accent);cursor:pointer;
-    box-shadow:0 0 0 6px rgba(168,85,247,.15);
-  }
-  .label{width:98px;color:var(--muted);font-size:13px}
-  .foot{margin-top:8px;color:var(--muted);font-size:12px}
-  .bar{
-    display:flex;align-items:center;gap:12px;
-    background:#0d0f15;border:1px solid var(--border);
-    padding:14px;border-radius:14px
-  }
-  .cta{margin-top:16px}
-  .cta a{
-    display:inline-block;background:var(--accent);color:#16072c;text-decoration:none;
-    padding:12px 16px;border-radius:12px;font-weight:800;letter-spacing:.3px;
-    transition:.15s background;
-  }
-  .cta a:hover{background:var(--accent-2)}
-  @media (max-width:720px){
-    body{padding:16px}
-    .head{flex-direction:column;align-items:flex-start}
-  }
-</style>
-</head>
-<body>
-  <div class="player">
-    <div class="head">
-      <div>
-        <h1>Before / After</h1>
-        <p class="sub">Instantly toggle between the raw “Before” and the final “After”. Loudness-matched for a fair comparison.</p>
-      </div>
-      <div class="seg" role="tablist" aria-label="Before After Toggle">
-        <button id="beforeBtn" class="active" role="tab" aria-selected="true">BEFORE</button>
-        <button id="afterBtn" role="tab" aria-selected="false">AFTER</button>
-      </div>
-    </div>
-
-    <div class="bar">
-      <button id="play" class="btn">▶ Play</button>
-      <div class="seek-wrap grow">
-        <input id="seek" type="range" min="0" max="1000" value="0" />
-      </div>
-      <div id="time" class="time">0:00</div>
-    </div>
-
-    <div class="row">
-      <div class="label">Gain Match</div>
-      <input id="gain" type="range" min="-8" max="8" step="0.5" value="0" class="grow" />
-      <div class="time">± dB</div>
-    </div>
-
-    <div class="foot">Files: <code>before.wav</code> and <code>after.wav</code> in the same folder, same length & start point.</div>
-
-    <!-- Optional CTA, edit/remove as you like -->
-    <!-- <div class="cta"><a href="https://www.mixedbyjack.net/#contact" target="_blank" rel="noopener">Book Your Mix</a></div> -->
+<!-- A/B Audio Player – customized for before/after.wav -->
+<div class="abp player__wrapper"
+     data-audio-a="before.wav"
+     data-audio-b="after.wav">
+  <div class="abp__progress" id="progress">
+    <div class="abp__progressFill" id="progress__fill"></div>
   </div>
+  <div class="abp__abControls">
+    <button class="abp__btn" data-role="A" disabled>A</button>
+    <button class="abp__btn" data-role="B" disabled>B</button>
+  </div>
+  <div class="abp__transport">
+    <button class="abp__btn abp__play" data-role="play" disabled>Play</button>
+    <button class="abp__btn abp__stop" data-role="stop" disabled>Stop</button>
+  </div>
+</div>
+
+<style>
+.abp.player__wrapper {
+  border-radius: 20px; background:#e6e6e6; padding:18px; max-width:520px;
+  box-shadow: 20px 20px 37px #cdcdcd, -20px -20px 37px #fff; margin:12px auto;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.abp__abControls, .abp__transport { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px }
+.abp__btn {
+  font-size:1rem; border:none; border-radius:10px; padding:.7rem 1rem; background:#e6e6e6; color:#666;
+  box-shadow:7px 7px 15px #cdcdcd, -7px -7px 15px #fff; cursor:pointer; transition:.2s all;
+}
+.abp__btn:hover { box-shadow:4px 4px 15px #cdcdcd, -4px -4px 15px #fff }
+.abp__btn:disabled { color:#bbb; box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #fff; cursor:not-allowed }
+.abp__stop { color:#8a5b5b }
+.abp__progress { height:12px; width:100%; border-radius:10px; margin-bottom:18px;
+  background:#e6e6e6; box-shadow: inset 7px 7px 15px #cdcdcd, inset -7px -7px 15px #fff; cursor:pointer }
+.abp__progressFill { height:100%; width:0%; border-radius:10px; background:linear-gradient(360deg,#2da87b,#34dcacfa) }
+</style>
 
 <script>
-  // Load WAVs
-  const BEFORE = new Audio('before.wav');
-  const AFTER  = new Audio('after.wav');
-  BEFORE.preload = 'auto';
-  AFTER.preload  = 'auto';
+(function initABPlayers(){
+  document.querySelectorAll('.abp.player__wrapper').forEach(function(wrapper){
+    const btnA = wrapper.querySelector('button[data-role="A"]');
+    const btnB = wrapper.querySelector('button[data-role="B"]');
+    const btnPlay = wrapper.querySelector('button[data-role="play"]');
+    const btnStop = wrapper.querySelector('button[data-role="stop"]');
+    const progress = wrapper.querySelector('.abp__progress');
+    const fill = wrapper.querySelector('.abp__progressFill');
 
-  // State
-  let isPlaying = false;
-  let active = BEFORE, inactive = AFTER; // default: BEFORE is selected
+    const aURL = wrapper.getAttribute('data-audio-a');
+    const bURL = wrapper.getAttribute('data-audio-b');
+    const soundA = new Audio(); soundA.src = aURL; soundA.preload = "auto";
+    const soundB = new Audio(); soundB.src = bURL; soundB.preload = "auto";
+    soundA.hidden = soundB.hidden = true; document.body.append(soundA, soundB);
 
-  // UI
-  const $ = id => document.getElementById(id);
-  const playBtn   = $('play');
-  const beforeBtn = $('beforeBtn');
-  const afterBtn  = $('afterBtn');
-  const seek      = $('seek');
-  const timeLbl   = $('time');
-  const gainCtl   = $('gain');
-
-  function setActive(which){
-    if (which === 'before'){
-      active = BEFORE; inactive = AFTER;
-      beforeBtn.classList.add('active'); afterBtn.classList.remove('active');
-      beforeBtn.setAttribute('aria-selected','true'); afterBtn.setAttribute('aria-selected','false');
-    } else {
-      active = AFTER;  inactive = BEFORE;
-      afterBtn.classList.add('active');  beforeBtn.classList.remove('active');
-      afterBtn.setAttribute('aria-selected','true'); beforeBtn.setAttribute('aria-selected','false');
+    let readyA = false, readyB = false;
+    function checkReady(){
+      if(readyA && readyB){ btnA.disabled = false; btnPlay.disabled = false; }
     }
-  }
-  setActive('before');
+    soundA.addEventListener('canplaythrough', () => { if(!readyA){ readyA = true; checkReady(); }});
+    soundB.addEventListener('canplaythrough', () => { if(!readyB){ readyB = true; checkReady(); }});
 
-  const fmt = t => {
-    const m = Math.floor(t/60);
-    const s = Math.floor(t%60).toString().padStart(2,'0');
-    return `${m}:${s}`;
-  };
-
-  async function prime(aud){ try{ await aud.play(); aud.pause(); }catch(e){} }
-
-  playBtn.onclick = async () => {
-    if (!isPlaying){
-      await prime(BEFORE); await prime(AFTER);
-      await active.play();
-      isPlaying = true;
-      playBtn.textContent = '⏸ Pause';
-    } else {
-      BEFORE.pause(); AFTER.pause();
-      isPlaying = false;
-      playBtn.textContent = '▶ Play';
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      btnPlay.disabled = false;
     }
-  };
 
-  beforeBtn.onclick = async () => {
-    if (active === BEFORE) return;
-    BEFORE.currentTime = AFTER.currentTime;
-    if (isPlaying){ await BEFORE.play(); AFTER.pause(); }
-    setActive('before');
-  };
-  afterBtn.onclick = async () => {
-    if (active === AFTER) return;
-    AFTER.currentTime = BEFORE.currentTime;
-    if (isPlaying){ await AFTER.play(); BEFORE.pause(); }
-    setActive('after');
-  };
-
-  // Seek
-  seek.oninput = () => {
-    const dur = active.duration || 1;
-    const t = (seek.value / 1000) * dur;
-    BEFORE.currentTime = t; AFTER.currentTime = t;
-    if (isPlaying) active.play();
-  };
-
-  // Progress + keep inactive synced for instant switch
-  setInterval(() => {
-    const dur = active.duration || 1;
-    if (dur > 0){
-      seek.value = Math.floor((active.currentTime / dur) * 1000);
-      timeLbl.textContent = fmt(active.currentTime || 0);
-      if (Math.abs(inactive.currentTime - active.currentTime) > 0.05){
-        inactive.currentTime = active.currentTime;
+    progress.addEventListener('click', function(e){
+      const rect = this.getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      if (soundA.duration && soundB.duration){
+        soundA.currentTime = pct * soundA.duration;
+        soundB.currentTime = pct * soundB.duration;
+        fill.style.width = (pct * 100) + '%';
       }
+    });
+
+    function stepA(){ fill.style.width = ((soundA.currentTime / soundA.duration) * 100 || 0) + '%'; requestAnimationFrame(stepA); }
+    function stepB(){ fill.style.width = ((soundB.currentTime / soundB.duration) * 100 || 0) + '%'; requestAnimationFrame(stepB); }
+    soundA.addEventListener('playing', stepA);
+    soundB.addEventListener('playing', stepB);
+
+    function syncTo(other, target){
+      if (other.currentTime > 0) target.currentTime = other.currentTime;
     }
-  }, 100);
+    btnPlay.addEventListener('click', function(){
+      if (soundA.paused && soundB.paused){
+        (soundA.currentTime >= soundB.currentTime ? soundA : soundB).play();
+        btnA.disabled = true; btnB.disabled = false; btnStop.disabled = false;
+        this.textContent = 'Pause';
+      } else {
+        soundA.pause(); soundB.pause(); this.textContent = 'Play';
+      }
+    });
 
-  // Simple gain trim (applies to both for fair loudness)
-  gainCtl.oninput = e => {
-    const db = parseFloat(e.target.value);
-    const gain = Math.pow(10, db/20);
-    BEFORE.volume = Math.min(1, gain);
-    AFTER.volume  = Math.min(1, gain);
-  };
+    btnA.addEventListener('click', function(){
+      this.disabled = true; btnB.disabled = false; btnPlay.textContent = 'Pause'; btnStop.disabled = false;
+      syncTo(soundB, soundA); soundA.play(); soundB.pause();
+    });
 
-  [BEFORE, AFTER].forEach(a =>
-    a.addEventListener('ended', () => { isPlaying = false; playBtn.textContent = '▶ Play'; })
-  );
+    btnB.addEventListener('click', function(){
+      this.disabled = true; btnA.disabled = false; btnPlay.textContent = 'Pause'; btnStop.disabled = false;
+      syncTo(soundA, soundB); soundB.play(); soundA.pause();
+    });
+
+    btnStop.addEventListener('click', function(){
+      soundA.pause(); soundB.pause(); soundA.currentTime = 0; soundB.currentTime = 0;
+      btnA.disabled = false; btnB.disabled = true; btnPlay.disabled = false; this.disabled = true;
+      btnPlay.textContent = 'Play'; fill.style.width = '0%';
+    });
+
+    btnB.disabled = true; btnStop.disabled = true;
+  });
+})();
 </script>
-</body>
-</html>
 

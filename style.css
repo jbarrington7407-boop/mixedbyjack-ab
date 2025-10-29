@@ -1,4 +1,20 @@
-/* Reset / base */
+/* Make the embed page itself invisible (only show the player) */
+html, body {
+  height: auto;        /* no forced fullscreen */
+}
+
+body {
+  background: transparent !important;  /* was #e6e6e6 — make it transparent for iframes */
+  margin: 0;                           /* remove any outer margins */
+  padding: 0;                          /* no padding around the player */
+  display: block;                      /* no centering grid in the embedded page */
+}
+
+/* If you still want the player centered when loading the page directly (not in an iframe),
+   you can center via auto margins: */
+.player__wrapper {
+  margin: 0 auto;                      /* centers when viewed directly */
+}/* Reset / base */
 *,
 *::before,
 *::after { box-sizing: border-box; }
